@@ -9,23 +9,21 @@ router = APIRouter(prefix="/board", tags=["boards"])
 async def list_boards():
     with Session(engine) as session:
         boards = select(Board)
-        query_result = session.exec(boards)
-        return list(query_result)
+        return list(session.exec(boards))
 
 
 @router.post("/")
 async def new_board(req_board: Board):
     with Session(engine) as session:
-        new_board = Board(title=req_board.title)
-        session.add(new_board)
+        session.add(Board(title=req_board.title))
         session.commit()
         return 'created'
 
 
-@router.put("/{id}")
-async def edit_board(id: int, req_board: Board):
+@router.put("/{board_id}")
+async def edit_board(board_id: int, req_board: Board):
     with Session(engine) as session:
-        board = session.exec(select(Board).where(Board.id == id)).one()
+        board = session.exec(select(Board).where(Board.id == board_id)).one()
         board.title = req_board.title
         session.add(board)
         session.commit()
@@ -33,10 +31,10 @@ async def edit_board(id: int, req_board: Board):
         return 'edited'
 
 
-@router.delete("/{id}")
-async def delete_board(id: int):
+@router.delete("/{board_id}")
+async def delete_board(board_id: int):
     with Session(engine) as session:
-        board = session.exec(select(Board).where(Board.id == id)).one()
+        board = session.exec(select(Board).where(Board.id == board_id)).one()
         session.delete(board)
         session.commit()
         return 'deleted'
