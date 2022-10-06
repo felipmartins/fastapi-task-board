@@ -1,21 +1,40 @@
 from fastapi import APIRouter
+from app.models.task_model import Task
+from app.models.db import engine
+from sqlmodel import Session, select
 
 router = APIRouter(prefix="/board", tags=["tasks"])
 
 
 @router.get("/{board_id}")
-async def list_tasks_from_board():
-    return ...
+async def list_tasks_from_board(board_id: int):
+    with Session(engine) as session:
+        task = select(Task).where(Task.board_id == board_id)
+        return list(session.exec(task))
 
 
 @router.post("/{board_id}")
-async def add_task_to_board():
-    return ...
+async def add_task_to_board(board_id: int, req_task: Task):
+    with Session(engine) as session: 
+        session.add(Task(board_id=board_id, title=req_task.title, description=req_task.description))
+        session.commit()
+        return 'created'
 
 @router.put("/{board_id}/{task_id}{")
-async def edit_task_from_board():
-    return ...
+async def edit_task_from_board(board_id: int, task_id: int, req_task: Task):
+    with Session(engine) as session:
+        task = session.exec(select(Task).where(Task.board_id == board_id).where(Task.id == task_id)).one()
+        task.title = req_task.title
+        task.description = req_task.description
+        session.add(task)
+        session.commit()
+        session.refresh(task)
+        return 'edited'
 
 @router.delete("/{board_id}/{task_id}{")
-async def delete_task_from_board():
-    return ...
+async def delete_task_from_board(board_id: int, task_id: int):
+    with Session(engine) as session:
+        task = session.exec(select(Task).where(Task.id == task_id)).one()
+        session.delete(task)
+        session.commit()
+        return 'deleted'
