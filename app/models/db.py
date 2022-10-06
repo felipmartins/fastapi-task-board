@@ -16,10 +16,10 @@ def test_board_insertion():
         session.commit()
 
 def test_task_insertion():
-    task = task_model.Task(title='Task do Felps', description='Description of Task do Felps')
+    task = task_model.Task(board_id = 1, title='Task do Felps', description='Description of Task do Felps')
     with Session(engine) as session:
         session.add(task)
         session.commit()
 
-# test_board_insertion()
-# test_task_insertion()
+test_board_insertion()
+test_task_insertion()
