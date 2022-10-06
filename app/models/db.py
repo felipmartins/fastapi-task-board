@@ -20,3 +20,6 @@ def test_task_insertion():
     with Session(engine) as session:
         session.add(task)
         session.commit()
+
+# test_board_insertion()
+# test_task_insertion()
