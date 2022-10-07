@@ -6,21 +6,24 @@ from sqlmodel import Session, select
 router = APIRouter(prefix="/board", tags=["tasks"])
 
 
-@router.get("/{board_id}")
+@router.get("/{board_id}", status_code=200)
 async def list_tasks_from_board(board_id: int):
     with Session(engine) as session:
         task = select(Task).where(Task.board_id == board_id)
         return list(session.exec(task))
 
 
-@router.post("/{board_id}")
+@router.post("/{board_id}", status_code=201)
 async def add_task_to_board(board_id: int, req_task: Task):
-    with Session(engine) as session: 
-        session.add(Task(board_id=board_id, title=req_task.title, description=req_task.description))
+    with Session(engine) as session:
+        new_task = Task(board_id=board_id, title=req_task.title, description=req_task.description)
+        session.add(new_task)
         session.commit()
-        return 'created'
+        return {'message':'task created',
+                'task': new_task}
+          
 
-@router.put("/{board_id}/{task_id}{")
+@router.put("/{board_id}/{task_id}", status_code=200)
 async def edit_task_from_board(board_id: int, task_id: int, req_task: Task):
     with Session(engine) as session:
         task = session.exec(select(Task).where(Task.board_id == board_id).where(Task.id == task_id)).one()
@@ -29,12 +32,13 @@ async def edit_task_from_board(board_id: int, task_id: int, req_task: Task):
         session.add(task)
         session.commit()
         session.refresh(task)
-        return 'edited'
+        return {'message':'task edited',
+                'task': task}
 
-@router.delete("/{board_id}/{task_id}{")
+@router.delete("/{board_id}/{task_id}", status_code=200)
 async def delete_task_from_board(board_id: int, task_id: int):
     with Session(engine) as session:
         task = session.exec(select(Task).where(Task.id == task_id)).one()
         session.delete(task)
         session.commit()
-        return 'deleted'
+        return {'message':'task deleted'}
