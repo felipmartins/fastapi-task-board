@@ -5,22 +5,24 @@ from sqlmodel import Session, select
 router = APIRouter(prefix="/board", tags=["boards"])
 
 
-@router.get("/")
+@router.get("/", status_code=200)
 async def list_boards():
     with Session(engine) as session:
         boards = select(Board)
         return list(session.exec(boards))
 
 
-@router.post("/")
+@router.post("/", status_code=201)
 async def new_board(req_board: Board):
     with Session(engine) as session:
-        session.add(Board(title=req_board.title))
+        new_board = Board(title=req_board.title)
+        session.add(new_board)
         session.commit()
-        return 'created'
+        return {'message':'board created',
+                'board': new_board}
 
 
-@router.put("/{board_id}")
+@router.put("/{board_id}", status_code=200)
 async def edit_board(board_id: int, req_board: Board):
     with Session(engine) as session:
         board = session.exec(select(Board).where(Board.id == board_id)).one()
@@ -28,13 +30,14 @@ async def edit_board(board_id: int, req_board: Board):
         session.add(board)
         session.commit()
         session.refresh(board)
-        return 'edited'
+        return {'message':'board edited',
+                'board': board}
 
 
-@router.delete("/{board_id}")
+@router.delete("/{board_id}", status_code=200)
 async def delete_board(board_id: int):
     with Session(engine) as session:
         board = session.exec(select(Board).where(Board.id == board_id)).one()
         session.delete(board)
         session.commit()
-        return 'deleted'
+        return {'message':'board deleted'}
