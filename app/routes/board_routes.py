@@ -15,11 +15,11 @@ async def list_boards():
 @router.post("/", status_code=201)
 async def new_board(req_board: Board):
     with Session(engine) as session:
-        new_board = Board(title=req_board.title)
-        session.add(new_board)
+        session.add(req_board)
         session.commit()
+        session.refresh(req_board)
         return {'message':'board created',
-                'board': new_board}
+                'board': req_board}
 
 
 @router.put("/{board_id}", status_code=200)
