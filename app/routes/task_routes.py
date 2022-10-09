@@ -16,9 +16,11 @@ async def list_tasks_from_board(board_id: int):
 @router.post("/{board_id}", status_code=201)
 async def add_task_to_board(board_id: int, req_task: Task):
     with Session(engine) as session:
-        new_task = Task(board_id=board_id, title=req_task.title, description=req_task.description)
+        new_task = req_task
+        new_task.board_id = board_id
         session.add(new_task)
         session.commit()
+        session.refresh(req_task)
         return {'message':'task created',
                 'task': new_task}
           
