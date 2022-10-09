@@ -9,6 +9,6 @@ app.include_router(board_routes.router)
 app.include_router(task_routes.router)
 
 
-@app.get("/", tags=["home"])
+@app.get("/", tags=["home"], status_code=200)
 async def home():
     return {"info": "this is the index route of the task board API, use /board to interact with boards and /board/{id} to retrieve all tasks associated with the chosen board"}
